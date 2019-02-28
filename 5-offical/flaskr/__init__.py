@@ -1,6 +1,10 @@
 import os
 
 from flask import Flask
+import click
+from . import db
+from . import auth
+from . import blog
 
 def create_app(test_config=None):
     #应用需要知道在哪里设置路径， 使用 __name__ 是一个方便的方法, 是当前模块的名称
@@ -20,15 +24,17 @@ def create_app(test_config=None):
         #load the test config if passed in 
         #test_config 也会被传递给工厂，并且会替代实例配置。这样可以实现 测试和开发的配置分离，相互独立
         app.config.from_mapping(test_config)
-    
     #ensure the instance folder exists
     try:
         os.makedirs(app.instance_path)
     except OSError:
         pass
 
-    @app.route('/')
-    def hello():
-        return 'Hello World!'
+    db.init_app(app)
+    
+    # app.register_blueprint(blog.blog_bp)
+    app.register_blueprint(auth.auth_bp)
+    app.register_blueprint(blog.blog_bp)
 
     return app
+
